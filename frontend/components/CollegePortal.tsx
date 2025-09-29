@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -42,6 +42,13 @@ export default function CollegePortal() {
       timestamp: new Date()
     }
   ]);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
 
   const studentInfo = {
     name: 'Rajesh Kumar',
@@ -725,6 +732,9 @@ export default function CollegePortal() {
                       </div>
                     </div>
                   )}
+
+                  {/* Scroll anchor */}
+                  <div ref={messagesEndRef} />
                 </div>
               </div>
 
