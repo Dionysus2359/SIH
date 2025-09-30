@@ -13,7 +13,7 @@ const sessionConfig = {
         secure: false, // Allow HTTP in development (set to true in production)
         sameSite: 'lax' // CSRF protection
     },
-    name: 'tourist-safety.sid' // Change default session name for security
+    name: 'sih_lang_agnosti_chatbot.sid' // Change default session name for security
 };
 
 module.exports = sessionConfig;

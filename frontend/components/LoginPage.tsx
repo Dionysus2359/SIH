@@ -5,6 +5,10 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { MessageCircle, Eye, EyeOff } from 'lucide-react';
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useAuth } from "../contexts/AuthContext";
+import { ROUTES } from "../constants";
 
 export default function LoginPage() {
   const navigate = useNavigate();

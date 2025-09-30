@@ -24,84 +24,84 @@ const errorHandler = (err, req, res, next) => {
 //  * Authentication Middleware - Session-based
 //  * Checks if user is authenticated using session
 //  */
-// const isLoggedIn = (req, res, next) => {
-//     console.log('Session check:', {
-//         hasSession: !!req.session,
-//         userId: req.session?.userId,
-//         userUsername: req.session?.userUsername,
-//         sessionID: req.sessionID,
-//         cookies: req.headers.cookie
-//     });
+const isLoggedIn = (req, res, next) => {
+    console.log('Session check:', {
+        hasSession: !!req.session,
+        userId: req.session?.userId,
+        userUsername: req.session?.userUsername,
+        sessionID: req.sessionID,
+        cookies: req.headers.cookie
+    });
 
-//     if (req.session && req.session.userId) {
-//         console.log('✅ User authenticated:', req.session.userId);
-//         return next();
-//     } else {
-//         console.log('❌ User not authenticated - no valid session');
-//         return res.status(401).json({
-//             success: false,
-//             message: "Authentication required. Please log in.",
-//             data: {}
-//         });
-//     }
-// };
+    if (req.session && req.session.userId) {
+        console.log('✅ User authenticated:', req.session.userId);
+        return next();
+    } else {
+        console.log('❌ User not authenticated - no valid session');
+        return res.status(401).json({
+            success: false,
+            message: "Authentication required. Please log in.",
+            data: {}
+        });
+    }
+};
 
 // /**
 //  * Authentication Middleware - Passport-based
 //  * Checks if user is authenticated using Passport.js
 //  */
-// const isAuthenticated = (req, res, next) => {
-//     if (req.isAuthenticated()) {
-//         return next();
-//     } else {
-//         return res.status(401).json({
-//             success: false,
-//             message: "Authentication required. Please log in.",
-//             data: {}
-//         });
-//     }
-// };
+const isAuthenticated = (req, res, next) => {
+    if (req.isAuthenticated()) {
+        return next();
+    } else {
+        return res.status(401).json({
+            success: false,
+            message: "Authentication required. Please log in.",
+            data: {}
+        });
+    }
+};
 
 // /**
 //  * Admin Authorization Middleware
 //  * Checks if authenticated user has admin role
 //  */
-// const isAdmin = async (req, res, next) => {
-//     try {
-//         if (!req.session || !req.session.userId) {
-//             return res.status(401).json({
-//                 success: false,
-//                 message: "Authentication required. Please log in.",
-//                 data: {}
-//             });
-//         }
+const isAdmin = async (req, res, next) => {
+    try {
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required. Please log in.",
+                data: {}
+            });
+        }
 
-//         const User = require('../models/user');
-//         const user = await User.findById(req.session.userId);
+        const User = require('../models/user');
+        const user = await User.findById(req.session.userId);
         
-//         if (!user) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "User not found",
-//                 data: {}
-//             });
-//         }
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+                data: {}
+            });
+        }
 
-//         if (user.role !== 'admin') {
-//             return res.status(403).json({
-//                 success: false,
-//                 message: "Access denied. Admin privileges required.",
-//                 data: {}
-//             });
-//         }
+        if (user.role !== 'faculty') {
+            return res.status(403).json({
+                success: false,
+                message: "Access denied. Faculty privileges required.",
+                data: {}
+            });
+        }
 
-//         req.user = user; // Attach user to request for use in controllers
-//         next();
-//     } catch (error) {
-//         console.error('Admin check error:', error);
-//         next(error);
-//     }
-// };
+        req.user = user; // Attach user to request for use in controllers
+        next();
+    } catch (error) {
+        console.error('Admin check error:', error);
+        next(error);
+    }
+};
 
 // /**
 //  * Tourist Authorization Middleware
@@ -256,10 +256,9 @@ module.exports = {
     notFound,
     
     // Authentication & Authorization
-    // isLoggedIn,
-    // isAuthenticated,
-    // isAdmin,
-    // isTourist,
+    isLoggedIn,
+    isAuthenticated,
+    isAdmin,
     
     // Validation
     validateRequestMiddleware,
