@@ -14,7 +14,16 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 // const ExpressError = require('./utils/ExpressError');
 
-const User = require('./models/user');
+// const User = require('./models/user');
+
+// Import middleware
+const {
+    errorHandler,
+    notFound,
+    requestLogger,
+    securityHeaders,
+    corsOptions
+} = require('./middleware');
 
 // Import configurations
 const connectDB = require('./config/database');
@@ -30,12 +39,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Session configuration
-app.use(session(sessionConfig));
-app.use(passport.initialize());
-app.use(passport.session());
-passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+// app.use(session(sessionConfig));
+// app.use(passport.initialize());
+// app.use(passport.session());
+// passport.use(new LocalStrategy(User.authenticate()));
+// passport.serializeUser(User.serializeUser());
+// passport.deserializeUser(User.deserializeUser());
 
 app.get('/', (req, res) => {
     res.send('API is running');
