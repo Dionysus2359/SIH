@@ -4,12 +4,14 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-
 import { Checkbox } from './ui/checkbox';
-import { MessageCircle, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { MessageCircle, Eye, EyeOff, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { useAuth } from "../contexts/AuthContext";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { register, loading } = useAuth();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -20,30 +22,30 @@ export default function RegisterPage() {
     confirmPassword: '',
     agreeToTerms: false
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const [passwordStrength, setPasswordStrength] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
 
     if (!formData.agreeToTerms) {
-      alert('Please agree to the terms and conditions');
+      setError('Please agree to the terms and conditions');
       return;
     }
 
-    setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Mock successful registration - redirect to portal
+    const result = await register(formData);
+
+    if (result.success) {
       navigate('/portal');
-    }, 1500);
+    } else {
+      setError(result.message || 'An unknown error occurred.');
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,7 +55,6 @@ export default function RegisterPage() {
       [name]: value
     });
 
-    // Calculate password strength
     if (name === 'password') {
       let strength = 0;
       if (value.length >= 8) strength++;
@@ -62,6 +63,10 @@ export default function RegisterPage() {
       if (/[^a-zA-Z0-9]/.test(value)) strength++;
       setPasswordStrength(strength);
     }
+  };
+
+  const handleCheckboxChange = (checked: boolean) => {
+    setFormData({ ...formData, agreeToTerms: checked });
   };
 
   const getPasswordStrengthColor = () => {
@@ -111,6 +116,12 @@ export default function RegisterPage() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <div className="p-3 rounded-md bg-red-900/50 border border-red-500/50 text-red-300 text-sm flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    <p>{error}</p>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
@@ -150,8 +161,6 @@ export default function RegisterPage() {
                     required
                   />
                 </div>
-
-
 
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
@@ -234,9 +243,7 @@ export default function RegisterPage() {
                   <Checkbox
                     id="terms"
                     checked={formData.agreeToTerms}
-                    onCheckedChange={(checked: boolean) => // added :boolean by myself
-                      setFormData({ ...formData, agreeToTerms: checked as boolean })
-                    }
+                    onCheckedChange={handleCheckboxChange}
                   />
                   <label
                     htmlFor="terms"
@@ -253,12 +260,10 @@ export default function RegisterPage() {
                   </label>
                 </div>
 
-                <Button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 shadow-[0_0_20px_rgba(139,92,246,0.5)] hover:shadow-[0_0_30px_rgba(139,92,246,0.7)] transition-all" disabled={isLoading}>
-                  {isLoading ? 'Creating account...' : 'Create account'}
+                <Button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 shadow-[0_0_20px_rgba(139,92,246,0.5)] hover:shadow-[0_0_30px_rgba(139,92,246,0.7)] transition-all" disabled={loading}>
+                  {loading ? 'Creating account...' : 'Create account'}
                 </Button>
               </form>
-
-
             </CardContent>
             <CardFooter className="flex flex-wrap items-center justify-center gap-2">
               <p className="text-sm text-purple-300">

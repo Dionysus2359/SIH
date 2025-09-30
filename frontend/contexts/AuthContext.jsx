@@ -223,6 +223,40 @@ export const AuthProvider = ({ children }) => {
         return () => clearInterval(interval);
     }, [isAuthenticated]);
 
+    const register = async (userData) => {
+        try {
+            setLoading(true);
+            const { confirmPassword, agreeToTerms, ...apiData } = userData; // Omit unnecessary fields
+
+            const response = await authAPI.register(apiData);
+
+            if (response.data.success) {
+                const newUserData = response.data.data;
+                console.log('✅ Registration successful:', newUserData.email, 'role:', newUserData.role);
+
+                // Automatically log the user in
+                setUser(newUserData);
+                setIsAuthenticated(true);
+                localStorage.setItem('user', JSON.stringify(newUserData));
+                localStorage.setItem('user_timestamp', Date.now().toString());
+                setAuthCheckCompleted(true);
+
+                return { success: true, user: newUserData };
+            } else {
+                console.log('❌ Registration failed:', response.data.message);
+                return { success: false, message: response.data.message };
+            }
+        } catch (error) {
+            console.error('❌ Registration error:', error.response?.data?.message || error.message);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Registration failed. Please try again.'
+            };
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Login function
     const login = async (credentials) => {
         try {
@@ -333,6 +367,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated,
         authCheckCompleted,
         authCheckInProgress,
+        register,
         login,
         logout,
         updateProfile,

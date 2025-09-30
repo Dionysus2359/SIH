@@ -18,16 +18,6 @@ const registerUser = async (req, res, next) => {
 
         const { firstName, lastName, email, password } = validation.value;
 
-        // Check if username already exists
-        // const existingUsername = await User.findOne({ username });
-        // if (existingUsername) {
-        //     return res.status(409).json({
-        //         success: false,
-        //         message: "Username already exists",
-        //         data: {}
-        //     });
-        // }
-
         // Check if email already exists
         const existingEmail = await User.findOne({ email });
         if (existingEmail) {
@@ -40,6 +30,7 @@ const registerUser = async (req, res, next) => {
 
         // Create new user with passport-local-mongoose
         const newUser = new User({
+            username: email, // <--- FIX: Use email as the username
             firstName,
             lastName,
             email,
@@ -109,7 +100,6 @@ const loginUser = async (req, res, next) => {
         }
 
         // Verify password using passport-local-mongoose authenticate method
-        // Handle both promise and callback-based authenticate methods
         const authenticateResult = await new Promise((resolve, reject) => {
             user.authenticate(password, (err, user, error) => {
                 if (err) reject(err);

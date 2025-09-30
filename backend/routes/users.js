@@ -34,18 +34,18 @@ router.post('/login',
 // GET /logout - Logout user
 router.get('/logout', asyncHandler(logoutUser));
 
-// GET /profile - Get user profile (requires authentication)
-router.get('/profile', 
-    isLoggedIn,
-    asyncHandler(getUserProfile)
-);
+// // GET /profile - Get user profile (requires authentication)
+// router.get('/profile', 
+//     isLoggedIn,
+//     asyncHandler(getUserProfile)
+// );
 
-// PUT /profile - Update user profile (requires authentication)
-router.put('/profile', 
-    isLoggedIn,
-    validateRequestMiddleware(userProfileUpdateSchema),
-    asyncHandler(updateUserProfile)
-);
+// // PUT /profile - Update user profile (requires authentication)
+// router.put('/profile', 
+//     isLoggedIn,
+//     validateRequestMiddleware(userProfileUpdateSchema),
+//     asyncHandler(updateUserProfile)
+// );
 
 
 // GET /all - Get all users (faculty only)

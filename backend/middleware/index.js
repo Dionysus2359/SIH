@@ -1,4 +1,4 @@
-// const { validateRequest } = require('../schemas');
+const { validateRequest } = require('../schemas');
 
 // /**
 //  * Centralized Error Handler Middleware

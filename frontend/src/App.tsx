@@ -7,7 +7,6 @@ import FacultyDashboard from '../components/FacultyDashboard';
 
 export default function App() {
   return (
-    <Router>
       <div className="min-h-screen bg-background">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -18,6 +17,5 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
-    </Router>
   );
 }

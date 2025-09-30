@@ -56,12 +56,12 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-app.use('/', userRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running');
 });
 
+app.use('/users', userRoutes);
 
 // 404 handler
 app.use(notFound);
