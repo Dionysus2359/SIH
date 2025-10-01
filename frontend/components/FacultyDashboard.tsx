@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -9,13 +11,13 @@ import { Label } from './ui/label';
 import { ScrollArea } from './ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { 
-  MessageCircle, 
-  Menu, 
-  X, 
-  Calendar, 
-  Clock, 
-  MapPin, 
+import {
+  MessageCircle,
+  Menu,
+  X,
+  Calendar,
+  Clock,
+  MapPin,
   User,
   LogOut,
   Plus,
@@ -28,6 +30,8 @@ import {
 } from 'lucide-react';
 
 export default function FacultyDashboard() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth(); // 2. Get user and logout function from context
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEditingTimetable, setIsEditingTimetable] = useState(false);
   const [newCircular, setNewCircular] = useState({
@@ -35,6 +39,8 @@ export default function FacultyDashboard() {
     category: '',
     content: ''
   });
+  // 3. Define a variable for the user's name for easy reuse
+  const facultyName = user?.name || `${user?.firstName} ${user?.lastName}`;
   const [aiApiKey, setAiApiKey] = useState('');
   const [showAddClassForm, setShowAddClassForm] = useState(false);
   const [newClass, setNewClass] = useState({
@@ -62,61 +68,66 @@ export default function FacultyDashboard() {
   ]);
 
   const [circulars, setCirculars] = useState([
-    { 
-      id: 1, 
-      title: 'Mid-Semester Examination Schedule', 
-      date: '2025-10-01', 
+    {
+      id: 1,
+      title: 'Mid-Semester Examination Schedule',
+      date: '2025-10-01',
       category: 'Academic',
-      content: 'Mid-semester examinations will be conducted from October 15-20, 2025.',
-      createdBy: 'Dr. Priya Sharma'
+      content: 'Mid-semester examinations will be conducted from October 20-25, 2025.',
+      createdBy: 'Om Tiwari'
     },
-    { 
-      id: 2, 
-      title: 'ML Assignment Deadline Extended', 
-      date: '2025-09-28', 
+    {
+      id: 2,
+      title: 'ML Assignment Deadline Extended',
+      date: '2025-10-10',
       category: 'Assignment',
-      content: 'The deadline for Machine Learning Assignment 2 has been extended to October 10, 2025.',
-      createdBy: 'Dr. Priya Sharma'
+      content: 'The deadline for Machine Learning Assignment 2 has been extended to October 28, 2025.',
+      createdBy: 'Om Tiwari'
     }
   ]);
 
   const queryLogs = [
     {
       id: 1,
-      timestamp: '2025-01-15 14:30:25',
+      timestamp: '2025-10-09 14:30:25',
       query: 'What are the library timings?',
       response: 'The library is open Monday to Sunday from 8:00 AM to 11:00 PM. During examination period, extended hours till 11:00 PM are available.',
       category: 'General Info'
     },
     {
       id: 2,
-      timestamp: '2025-01-15 14:25:10',
+      timestamp: '2025-10-09 14:25:10',
       query: 'When is the fee payment deadline?',
-      response: 'The last date for semester fee payment is October 15, 2025. You can pay online through the portal or visit the Accounts Office.',
+      response: 'The last date for semester fee payment is October 25, 2025. You can pay online through the portal or visit the Accounts Office.',
       category: 'Finance'
     },
     {
       id: 3,
-      timestamp: '2025-01-15 14:20:45',
+      timestamp: '2025-10-09 14:20:45',
       query: 'Machine Learning assignment deadline?',
-      response: 'The deadline for Machine Learning Assignment 2 has been extended to October 10, 2025.',
+      response: 'The deadline for Machine Learning Assignment 2 has been extended to October 28, 2025.',
       category: 'Academic'
     },
     {
       id: 4,
-      timestamp: '2025-01-15 14:15:30',
+      timestamp: '2025-10-09 14:15:30',
       query: 'Where is the computer lab?',
       response: 'The Computer Lab (Lab-201) is located on the 2nd floor of the Engineering Block.',
       category: 'Location'
     },
     {
       id: 5,
-      timestamp: '2025-01-15 14:10:15',
+      timestamp: '2025-10-09 14:10:15',
       query: 'Mid-semester exam schedule?',
-      response: 'Mid-semester examinations will be conducted from October 15-20, 2025. Please check your examination schedule on the portal.',
+      response: 'Mid-semester examinations will be conducted from October 20-25, 2025. Please check your examination schedule on the portal.',
       category: 'Academic'
     }
   ];
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   const handleAddCircular = () => {
     if (!newCircular.title || !newCircular.category || !newCircular.content) {
@@ -163,7 +174,7 @@ export default function FacultyDashboard() {
             <nav className="hidden md:flex items-center gap-4">
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/30">
                 <User className="w-4 h-4 text-purple-300" />
-                <span className="text-sm text-purple-200">{facultyInfo.name}</span>
+                <span className="text-sm text-purple-200">{facultyName}</span>
               </div>
               <Link to="/">
                 <Button variant="outline" size="sm" className="border-primary/30 hover:bg-primary/10 hover:border-primary/50">
@@ -187,7 +198,7 @@ export default function FacultyDashboard() {
             <nav className="md:hidden mt-4 pt-4 border-t border-primary/20 space-y-3">
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/30">
                 <User className="w-4 h-4 text-purple-300" />
-                <span className="text-sm text-purple-200">{facultyInfo.name}</span>
+                <span className="text-sm text-purple-200">{facultyName}</span>
               </div>
               <Link to="/" className="block">
                 <Button variant="outline" className="w-full border-primary/30 hover:bg-primary/10">
@@ -211,7 +222,7 @@ export default function FacultyDashboard() {
               </div>
               <div className="flex-1">
                 <h2 className="text-2xl mb-2 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                  {facultyInfo.name}
+                  {facultyName}
                 </h2>
                 <div className="flex flex-wrap gap-3 mb-3">
                   <Badge variant="secondary" className="bg-purple-900/50 text-purple-200 border-primary/20">
@@ -267,7 +278,7 @@ export default function FacultyDashboard() {
                       {isEditingTimetable ? <Save className="w-4 h-4 mr-2" /> : <Edit className="w-4 h-4 mr-2" />}
                       {isEditingTimetable ? 'Save Changes' : 'Edit Timetable'}
                     </Button>
-                    <Button 
+                    <Button
                       onClick={() => setShowAddClassForm(!showAddClassForm)}
                       className="bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500"
                     >
@@ -284,8 +295,8 @@ export default function FacultyDashboard() {
                     <div className="grid md:grid-cols-2 gap-4 mb-4">
                       <div className="space-y-2">
                         <Label>Day</Label>
-                        <Select value={newClass.day} onValueChange={(value: string) => setNewClass({...newClass, day: value})}> 
-                            {/* // added :string by myself */}
+                        <Select value={newClass.day} onValueChange={(value: string) => setNewClass({ ...newClass, day: value })}>
+                          {/* // added :string by myself */}
                           <SelectTrigger>
                             <SelectValue placeholder="Select day" />
                           </SelectTrigger>
@@ -303,7 +314,7 @@ export default function FacultyDashboard() {
                         <Label>Time</Label>
                         <Input
                           value={newClass.time}
-                          onChange={(e) => setNewClass({...newClass, time: e.target.value})}
+                          onChange={(e) => setNewClass({ ...newClass, time: e.target.value })}
                           placeholder="e.g., 9:00 AM - 10:30 AM"
                         />
                       </div>
@@ -311,7 +322,7 @@ export default function FacultyDashboard() {
                         <Label>Subject</Label>
                         <Input
                           value={newClass.subject}
-                          onChange={(e) => setNewClass({...newClass, subject: e.target.value})}
+                          onChange={(e) => setNewClass({ ...newClass, subject: e.target.value })}
                           placeholder="Enter subject name"
                         />
                       </div>
@@ -319,7 +330,7 @@ export default function FacultyDashboard() {
                         <Label>Room</Label>
                         <Input
                           value={newClass.room}
-                          onChange={(e) => setNewClass({...newClass, room: e.target.value})}
+                          onChange={(e) => setNewClass({ ...newClass, room: e.target.value })}
                           placeholder="e.g., LH-301"
                         />
                       </div>
@@ -327,13 +338,13 @@ export default function FacultyDashboard() {
                         <Label>Program</Label>
                         <Input
                           value={newClass.program}
-                          onChange={(e) => setNewClass({...newClass, program: e.target.value})}
+                          onChange={(e) => setNewClass({ ...newClass, program: e.target.value })}
                           placeholder="e.g., B.Tech CSE"
                         />
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button 
+                      <Button
                         onClick={() => {
                           if (!newClass.day || !newClass.time || !newClass.subject || !newClass.room || !newClass.program) {
                             alert('Please fill all fields');
@@ -356,8 +367,8 @@ export default function FacultyDashboard() {
                         <Plus className="w-4 h-4 mr-2" />
                         Add Class
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => {
                           setShowAddClassForm(false);
                           setNewClass({ day: '', time: '', subject: '', room: '', program: '' });
@@ -398,9 +409,9 @@ export default function FacultyDashboard() {
                         </div>
                         {isEditingTimetable && (
                           <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
+                            <Button
+                              size="sm"
+                              variant="outline"
                               className="border-primary/30"
                               onClick={() => {
                                 // Edit timetable item
@@ -409,9 +420,9 @@ export default function FacultyDashboard() {
                             >
                               <Edit className="w-3 h-3" />
                             </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
+                            <Button
+                              size="sm"
+                              variant="outline"
                               className="border-red-500/30 text-red-400 hover:bg-red-950/30"
                               onClick={() => {
                                 // Delete timetable item
@@ -447,7 +458,7 @@ export default function FacultyDashboard() {
                       <Input
                         id="circularTitle"
                         value={newCircular.title}
-                        onChange={(e) => setNewCircular({...newCircular, title: e.target.value})}
+                        onChange={(e) => setNewCircular({ ...newCircular, title: e.target.value })}
                         placeholder="Enter circular title"
                       />
                     </div>
@@ -455,7 +466,7 @@ export default function FacultyDashboard() {
                       <Label htmlFor="circularCategory">Category</Label>
                       <Select
                         value={newCircular.category}
-                        onValueChange={(value: string) => setNewCircular({...newCircular, category: value})}
+                        onValueChange={(value: string) => setNewCircular({ ...newCircular, category: value })}
                       >
                         {/* added :string by myself */}
                         <SelectTrigger>
@@ -476,7 +487,7 @@ export default function FacultyDashboard() {
                     <Textarea
                       id="circularContent"
                       value={newCircular.content}
-                      onChange={(e) => setNewCircular({...newCircular, content: e.target.value})}
+                      onChange={(e) => setNewCircular({ ...newCircular, content: e.target.value })}
                       placeholder="Enter circular content"
                       rows={4}
                     />
@@ -499,13 +510,13 @@ export default function FacultyDashboard() {
                       <Card key={circular.id} className="p-5 bg-gradient-to-br from-purple-900/20 to-purple-950/20 border-primary/30 hover:border-primary/50 transition-all">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center gap-2">
-                            <Badge 
-                              variant="outline" 
+                            <Badge
+                              variant="outline"
                               className={
                                 circular.category === 'Academic' ? 'border-blue-500/40 text-blue-300 bg-blue-950/30' :
-                                circular.category === 'Assignment' ? 'border-green-500/40 text-green-300 bg-green-950/30' :
-                                circular.category === 'Examination' ? 'border-red-500/40 text-red-300 bg-red-950/30' :
-                                'border-purple-500/40 text-purple-300 bg-purple-950/30'
+                                  circular.category === 'Assignment' ? 'border-green-500/40 text-green-300 bg-green-950/30' :
+                                    circular.category === 'Examination' ? 'border-red-500/40 text-red-300 bg-red-950/30' :
+                                      'border-purple-500/40 text-purple-300 bg-purple-950/30'
                               }
                             >
                               {circular.category}
@@ -589,7 +600,7 @@ export default function FacultyDashboard() {
                         AI API Key Configuration
                       </Label>
                       <p className="text-sm text-purple-400 mb-4">
-                        Configure your AI API key to enhance chatbot responses. This is optional and will be securely stored.
+                        Configure your own AI API key to use your own ai. This is optional and will be securely stored.
                       </p>
                     </div>
                     <div className="space-y-2">
@@ -604,7 +615,7 @@ export default function FacultyDashboard() {
                       />
                     </div>
                     <div className="flex gap-3">
-                      <Button 
+                      <Button
                         onClick={() => {
                           // Here you would typically send the API key to your backend
                           alert('API key saved successfully!');
@@ -614,8 +625,8 @@ export default function FacultyDashboard() {
                       >
                         Save API Key
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => setAiApiKey('')}
                         className="border-primary/30 hover:bg-primary/10"
                       >
@@ -624,11 +635,7 @@ export default function FacultyDashboard() {
                     </div>
                     <div className="text-xs text-purple-500 max-w-2xl">
                       <p className="mb-2">
-                        <strong>Note:</strong> The API key will be encrypted and stored securely on the backend. 
-                        This will be used to enhance the AI chatbot's responses with more advanced capabilities.
-                      </p>
-                      <p>
-                        Supported APIs: OpenAI GPT, Google Gemini, Anthropic Claude, etc.
+                        <strong>Note:</strong> The API key will be encrypted and stored securely on the backend.
                       </p>
                     </div>
                   </div>

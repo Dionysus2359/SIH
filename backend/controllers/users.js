@@ -119,7 +119,7 @@ const loginUser = async (req, res, next) => {
         // Create session
         req.session.userId = user._id;
         // req.session.userUsername = user.username;
-        req.session.userEmail = user.email;
+        req.session.username = user.email;
         req.session.role = user.role; // Store role in session
 
         // Save session explicitly to ensure it's persisted

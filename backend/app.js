@@ -32,6 +32,7 @@ const connectDB = require('./config/database');
 const sessionConfig = require('./config/session');
 
 connectDB();
+
 // Security middleware
 app.use(securityHeaders);
 
@@ -48,6 +49,25 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Session configuration
+
+const MongoStore = require('connect-mongo');
+
+const mongoUri = process.env.MONGODB_URI ||
+    `mongodb+srv://Dionysus2359:${process.env.MONGODB_ATLAS_PASS}@cluster0.oi6s3l6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
+const secret = process.env.SESSION_SECRET || 'your-super-secure-session-secret-change-this-in-production';
+
+const store = MongoStore.create({
+    mongoUrl: mongoUri,
+    touchAfter: 24 * 60 * 60,
+    crypto: {
+        secret: secret
+    }
+})
+store.on("error", (e) => {
+    console.log("Session store Error!", e);
+});
+
 app.use(session(sessionConfig));
 app.use(passport.initialize());
 app.use(passport.session());

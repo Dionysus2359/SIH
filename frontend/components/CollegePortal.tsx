@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -7,16 +9,16 @@ import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { 
-  MessageCircle, 
-  Menu, 
-  X, 
-  Bell, 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Phone, 
-  Mail, 
+import {
+  MessageCircle,
+  Menu,
+  X,
+  Bell,
+  Calendar,
+  Clock,
+  MapPin,
+  Phone,
+  Mail,
   User,
   LogOut,
   Send,
@@ -29,6 +31,8 @@ import {
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 export default function CollegePortal() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth(); // 2. Get user and logout function from context
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
@@ -49,7 +53,9 @@ export default function CollegePortal() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
-
+  
+  const studentName = user?.name || `${user?.firstName} ${user?.lastName}`;
+  const studentemail = user?.email || `${user?.email}`;
   const studentInfo = {
     name: 'Rajesh Kumar',
     email: 'rajesh.kumar@snu.edu.in',
@@ -69,31 +75,31 @@ export default function CollegePortal() {
   ];
 
   const circulars = [
-    { 
-      id: 1, 
-      title: 'Mid-Semester Examination Schedule', 
-      date: '2025-10-01', 
+    {
+      id: 1,
+      title: 'Mid-Semester Examination Schedule',
+      date: '2025-10-01',
       category: 'Academic',
       content: 'Mid-semester examinations will be conducted from October 15-20, 2025. Please check your examination schedule on the portal.'
     },
-    { 
-      id: 2, 
-      title: 'Fee Payment Deadline Extended', 
-      date: '2025-09-28', 
+    {
+      id: 2,
+      title: 'Fee Payment Deadline Extended',
+      date: '2025-09-28',
       category: 'Finance',
       content: 'The last date for semester fee payment has been extended to October 15, 2025.'
     },
-    { 
-      id: 3, 
-      title: 'Cultural Fest Registration Open', 
-      date: '2025-09-25', 
+    {
+      id: 3,
+      title: 'Cultural Fest Registration Open',
+      date: '2025-09-25',
       category: 'Events',
       content: 'Register for the annual cultural fest "Transcendence 2025". Last date: October 5, 2025.'
     },
-    { 
-      id: 4, 
-      title: 'Library Hours Extended', 
-      date: '2025-09-20', 
+    {
+      id: 4,
+      title: 'Library Hours Extended',
+      date: '2025-09-20',
       category: 'Facility',
       content: 'Library will remain open till 11:00 PM during examination period.'
     }
@@ -171,6 +177,11 @@ export default function CollegePortal() {
     { office: 'Library', timing: 'Mon-Sun: 8:00 AM - 11:00 PM', location: 'Central Library Building' }
   ];
 
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   const handleSendMessage = () => {
     if (!chatMessage.trim()) return;
 
@@ -196,7 +207,7 @@ export default function CollegePortal() {
 
   const getBotResponse = (query: string) => {
     const lowerQuery = query.toLowerCase();
-    
+
     if (lowerQuery.includes('fee') || lowerQuery.includes('payment')) {
       return 'The last date for semester fee payment is October 15, 2025. You can pay online through the portal or visit the Accounts Office (Mon-Fri, 9:30 AM - 4:30 PM).';
     } else if (lowerQuery.includes('exam') || lowerQuery.includes('examination')) {
@@ -246,7 +257,7 @@ export default function CollegePortal() {
               </Button>
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/30">
                 <User className="w-4 h-4 text-purple-300" />
-                <span className="text-sm text-purple-200">{studentInfo.name}</span>
+                <span className="text-sm text-purple-200">{studentName}</span>
               </div>
               <Link to="/">
                 <Button variant="outline" size="sm" className="border-primary/30 hover:bg-primary/10 hover:border-primary/50">
@@ -274,7 +285,7 @@ export default function CollegePortal() {
               </Button>
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/30">
                 <User className="w-4 h-4 text-purple-300" />
-                <span className="text-sm text-purple-200">{studentInfo.name}</span>
+                <span className="text-sm text-purple-200">{studentName}</span>
               </div>
               <Link to="/" className="block">
                 <Button variant="outline" className="w-full border-primary/30 hover:bg-primary/10">
@@ -292,13 +303,13 @@ export default function CollegePortal() {
         {/* Student Info Card */}
         <Card className="mb-8 overflow-hidden bg-black/60 border-primary/30 shadow-[0_0_20px_rgba(139,92,246,0.2)] backdrop-blur-sm">
           <div className="relative h-48 md:h-64">
-            <ImageWithFallback 
+            <ImageWithFallback
               src="https://images.unsplash.com/photo-1600903308878-bf5e554ab841?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjB1bml2ZXJzaXR5JTIwY2FtcHVzJTIwYnVpbGRpbmd8ZW58MXx8fHwxNzU5MTMwNzQ3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
               alt="Campus"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-            
+
             {/* Ask Selene Button - Top Left of Image */}
             {!isChatOpen && (
               <div className="absolute top-4 left-4 z-20">
@@ -320,7 +331,7 @@ export default function CollegePortal() {
               </div>
               <div className="flex-1">
                 <h2 className="text-2xl mb-2 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                  {studentInfo.name}
+                  {studentName}
                 </h2>
                 <div className="flex flex-wrap gap-3 mb-3">
                   <Badge variant="secondary" className="bg-purple-900/50 text-purple-200 border-primary/20">
@@ -335,7 +346,7 @@ export default function CollegePortal() {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-purple-300">
                   <Mail className="w-4 h-4" />
-                  {studentInfo.email}
+                  {studentemail}
                 </div>
               </div>
             </div>
@@ -397,9 +408,9 @@ export default function CollegePortal() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
+                          <Button
+                            size="sm"
+                            variant="outline"
                             className="border-green-500/30 text-green-400 hover:bg-green-950/30"
                             onClick={() => {
                               // Add to calendar functionality
@@ -432,14 +443,14 @@ export default function CollegePortal() {
                       <div className="flex flex-col md:flex-row md:items-start gap-4">
                         <div className="flex-1">
                           <div className="flex items-start justify-between mb-3">
-                            <Badge 
-                              variant="outline" 
+                            <Badge
+                              variant="outline"
                               className={
                                 event.category === 'Academic' ? 'border-blue-500/40 text-blue-300 bg-blue-950/30' :
-                                event.category === 'Cultural' ? 'border-purple-500/40 text-purple-300 bg-purple-950/30' :
-                                event.category === 'Career' ? 'border-green-500/40 text-green-300 bg-green-950/30' :
-                                event.category === 'Sports' ? 'border-orange-500/40 text-orange-300 bg-orange-950/30' :
-                                'border-yellow-500/40 text-yellow-300 bg-yellow-950/30'
+                                  event.category === 'Cultural' ? 'border-purple-500/40 text-purple-300 bg-purple-950/30' :
+                                    event.category === 'Career' ? 'border-green-500/40 text-green-300 bg-green-950/30' :
+                                      event.category === 'Sports' ? 'border-orange-500/40 text-orange-300 bg-orange-950/30' :
+                                        'border-yellow-500/40 text-yellow-300 bg-yellow-950/30'
                               }
                             >
                               {event.category}
@@ -470,9 +481,9 @@ export default function CollegePortal() {
                           )}
                         </div>
                         <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
+                          <Button
+                            size="sm"
+                            variant="outline"
                             className="border-green-500/30 text-green-400 hover:bg-green-950/30"
                             onClick={() => {
                               // Add to calendar functionality for events
@@ -487,8 +498,8 @@ export default function CollegePortal() {
                             Add to Calendar
                           </Button>
                           {event.registrationRequired && (
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               className="bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500"
                             >
                               Register Now
@@ -514,13 +525,13 @@ export default function CollegePortal() {
                   {circulars.map((circular) => (
                     <Card key={circular.id} className="p-5 bg-gradient-to-br from-purple-900/20 to-purple-950/20 border-primary/30 hover:border-primary/50 transition-all">
                       <div className="flex items-start justify-between mb-3">
-                        <Badge 
-                          variant="outline" 
+                        <Badge
+                          variant="outline"
                           className={
                             circular.category === 'Academic' ? 'border-blue-500/40 text-blue-300 bg-blue-950/30' :
-                            circular.category === 'Finance' ? 'border-green-500/40 text-green-300 bg-green-950/30' :
-                            circular.category === 'Events' ? 'border-purple-500/40 text-purple-300 bg-purple-950/30' :
-                            'border-yellow-500/40 text-yellow-300 bg-yellow-950/30'
+                              circular.category === 'Finance' ? 'border-green-500/40 text-green-300 bg-green-950/30' :
+                                circular.category === 'Events' ? 'border-purple-500/40 text-purple-300 bg-purple-950/30' :
+                                  'border-yellow-500/40 text-yellow-300 bg-yellow-950/30'
                           }
                         >
                           {circular.category}
@@ -606,11 +617,11 @@ export default function CollegePortal() {
             <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 border-2 border-black flex items-center justify-center animate-pulse">
               <Sparkles className="w-3 h-3 text-white animate-spin" />
             </div>
-            
+
             {/* Accessibility Ring Animation */}
             <div className="absolute inset-0 rounded-full border-2 border-purple-400 opacity-0 group-hover:opacity-100 animate-ping"></div>
           </button>
-          
+
           {/* Tooltip */}
           <div className="absolute bottom-20 right-0 bg-black/90 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
             Click to chat with Selene, your AI assistant
@@ -620,14 +631,13 @@ export default function CollegePortal() {
 
       {/* Chat Window */}
       {isChatOpen && (
-        <div 
-          className={`fixed ${
-            isChatFullscreen 
-              ? 'inset-0 w-full h-full' 
-              : isChatMinimized 
-                ? 'bottom-6 right-6 w-80' 
+        <div
+          className={`fixed ${isChatFullscreen
+              ? 'inset-0 w-full h-full'
+              : isChatMinimized
+                ? 'bottom-6 right-6 w-80'
                 : 'bottom-6 right-6 w-96 h-[600px]'
-          } bg-black/95 border border-primary/30 ${isChatFullscreen ? 'rounded-none' : 'rounded-xl'} shadow-[0_0_40px_rgba(139,92,246,0.4)] backdrop-blur-md z-50 flex flex-col transition-all overflow-hidden`}
+            } bg-black/95 border border-primary/30 ${isChatFullscreen ? 'rounded-none' : 'rounded-xl'} shadow-[0_0_40px_rgba(139,92,246,0.4)] backdrop-blur-md z-50 flex flex-col transition-all overflow-hidden`}
         >
           {/* Chat Header */}
           <div className={`flex-shrink-0 p-4 border-b border-primary/30 bg-gradient-to-r from-purple-900/50 to-violet-900/50 ${isChatFullscreen ? 'rounded-none' : 'rounded-t-xl'} flex items-center justify-between`}>
@@ -640,7 +650,7 @@ export default function CollegePortal() {
                 <p className="text-xs text-purple-300">AI Campus Assistant</p>
               </div>
             </div>
-            
+
             {/* Language Selection and Controls */}
             <div className="flex items-center gap-3">
               {/* Language Selector */}
@@ -661,7 +671,7 @@ export default function CollegePortal() {
                   </Select>
                 </div>
               )}
-              
+
               <div className="flex items-center gap-2">
                 {/* Fullscreen Toggle */}
                 {!isChatMinimized && (
@@ -677,7 +687,7 @@ export default function CollegePortal() {
                     )}
                   </button>
                 )}
-                
+
                 {/* Minimize Toggle */}
                 <button
                   onClick={() => setIsChatMinimized(!isChatMinimized)}
@@ -690,7 +700,7 @@ export default function CollegePortal() {
                     <Minimize2 className="w-4 h-4 text-purple-300" />
                   )}
                 </button>
-                
+
                 {/* Close */}
                 <button
                   onClick={() => setIsChatOpen(false)}
@@ -711,17 +721,16 @@ export default function CollegePortal() {
                   {chatMessages.map((msg, index) => (
                     <div key={index} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div
-                        className={`${isChatFullscreen ? 'max-w-[60%]' : 'max-w-[80%]'} rounded-lg px-4 py-3 ${
-                          msg.type === 'user'
+                        className={`${isChatFullscreen ? 'max-w-[60%]' : 'max-w-[80%]'} rounded-lg px-4 py-3 ${msg.type === 'user'
                             ? 'bg-gradient-to-br from-purple-600 to-violet-600 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]'
                             : 'bg-gradient-to-br from-purple-900/40 to-purple-950/40 border border-primary/30 text-purple-100'
-                        }`}
+                          }`}
                       >
                         <p className={`${isChatFullscreen ? 'text-base' : 'text-sm'} leading-relaxed`}>{msg.message}</p>
                       </div>
                     </div>
                   ))}
-                  
+
                   {/* Language Information Banner */}
                   {selectedLanguage !== 'English' && (
                     <div className="flex justify-center my-4">
