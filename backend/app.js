@@ -26,6 +26,9 @@ const {
 } = require('./middleware');
 
 const userRoutes = require('./routes/users');
+const chatbotRoutes = require('./routes/chatbotRoutes');
+const timetableRoutes = require('./routes/timetableRoutes');
+const circularRoutes = require('./routes/circularRoutes');
 
 // Import configurations
 const connectDB = require('./config/database');
@@ -82,6 +85,9 @@ app.get('/', (req, res) => {
 });
 
 app.use('/users', userRoutes);
+app.use('/chatbot', chatbotRoutes);
+app.use('/timetable', timetableRoutes); // 3. Use timetable routes
+app.use('/circulars', circularRoutes);   // 4. Use circular routes
 
 // 404 handler
 app.use(notFound);

@@ -25,25 +25,13 @@ const errorHandler = (err, req, res, next) => {
 //  * Checks if user is authenticated using session
 //  */
 const isLoggedIn = (req, res, next) => {
-    console.log('Session check:', {
-        hasSession: !!req.session,
-        userId: req.session?.userId,
-        userUsername: req.session?.userUsername,
-        sessionID: req.sessionID,
-        cookies: req.headers.cookie
-    });
-
-    if (req.session && req.session.userId) {
-        console.log('✅ User authenticated:', req.session.userId);
+    if (req.isAuthenticated()) {
         return next();
-    } else {
-        console.log('❌ User not authenticated - no valid session');
-        return res.status(401).json({
-            success: false,
-            message: "Authentication required. Please log in.",
-            data: {}
-        });
     }
+    return res.status(401).json({
+        success: false,
+        message: "Authentication required. Please log in.",
+    });
 };
 
 // /**
@@ -66,83 +54,17 @@ const isAuthenticated = (req, res, next) => {
 //  * Admin Authorization Middleware
 //  * Checks if authenticated user has admin role
 //  */
-const isAdmin = async (req, res, next) => {
-    try {
-        if (!req.session || !req.session.userId) {
-            return res.status(401).json({
-                success: false,
-                message: "Authentication required. Please log in.",
-                data: {}
-            });
-        }
-
-        const User = require('../models/user');
-        const user = await User.findById(req.session.userId);
-        
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found",
-                data: {}
-            });
-        }
-
-        if (user.role !== 'faculty') {
-            return res.status(403).json({
-                success: false,
-                message: "Access denied. Faculty privileges required.",
-                data: {}
-            });
-        }
-
-        req.user = user; // Attach user to request for use in controllers
-        next();
-    } catch (error) {
-        console.error('Admin check error:', error);
-        next(error);
+const isAdmin = (req, res, next) => {
+    // req.user is automatically provided by Passport if the user is logged in.
+    // No need to fetch the user from the database again.
+    if (req.user && req.user.role === 'faculty') {
+        return next();
     }
+    return res.status(403).json({
+        success: false,
+        message: "Access denied. Faculty privileges required.",
+    });
 };
-
-// /**
-//  * Tourist Authorization Middleware
-//  * Checks if authenticated user has tourist role
-//  */
-// const isTourist = async (req, res, next) => {
-//     try {
-//         if (!req.session || !req.session.userId) {
-//             return res.status(401).json({
-//                 success: false,
-//                 message: "Authentication required. Please log in.",
-//                 data: {}
-//             });
-//         }
-
-//         const User = require('../models/user');
-//         const user = await User.findById(req.session.userId);
-        
-//         if (!user) {
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "User not found",
-//                 data: {}
-//             });
-//         }
-
-//         if (user.role !== 'tourist') {
-//             return res.status(403).json({
-//                 success: false,
-//                 message: "Access denied. Tourist privileges required.",
-//                 data: {}
-//             });
-//         }
-
-//         req.user = user; // Attach user to request for use in controllers
-//         next();
-//     } catch (error) {
-//         console.error('Tourist check error:', error);
-//         next(error);
-//     }
-// };
 
 /**
  * Generic Request Validator Middleware
@@ -156,11 +78,9 @@ const validateRequestMiddleware = (schema) => {
                 return res.status(400).json({
                     success: false,
                     message: validation.error,
-                    data: {}
                 });
             }
-            
-            req.validatedData = validation.value; // Attach validated data to request
+            req.validatedData = validation.value;
             next();
         } catch (error) {
             console.error('Validation middleware error:', error);

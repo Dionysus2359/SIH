@@ -22,6 +22,10 @@ const UserSchema = new Schema({
         enum: ['student', 'faculty'],
         default: 'student'
     },
+    program: {
+        type: String,
+        default: 'B.Tech CSE'
+    },
     createdAt: {
         type: Date,
         default: Date.now

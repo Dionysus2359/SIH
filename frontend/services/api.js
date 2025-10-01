@@ -53,6 +53,22 @@ export const usersAPI = {
     getAll: () => api.get('/users/all'),
 };
 
+export const chatAPI = {
+  sendMessage: (prompt) => api.post('/chatbot/chat', { prompt }),
+};
+
+export const timetableAPI = {
+  get: () => api.get('/timetable'),
+  add: (itemData) => api.post('/timetable', itemData),
+  delete: (id) => api.delete(`/timetable/${id}`),
+};
+
+export const circularsAPI = {
+  get: () => api.get('/circulars'),
+  add: (itemData) => api.post('/circulars', itemData),
+  delete: (id) => api.delete(`/circulars/${id}`),
+};
+
 // export const incidentsAPI = {
 //     getAll: () => api.get('/incidents'),
 //     getById: (id) => api.get(`/incidents/${id}`),

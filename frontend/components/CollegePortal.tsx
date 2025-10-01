@@ -29,6 +29,25 @@ import {
   Languages
 } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { chatAPI } from '../services/api';
+import { timetableAPI, circularsAPI } from '../services/api';
+
+interface TimetableItem {
+  _id: string;
+  day: string;
+  time: string;
+  subject: string;
+  room: string;
+  faculty: string;
+}
+
+interface Circular {
+  _id: string;
+  title: string;
+  date: string;
+  category: string;
+  content: string;
+}
 
 export default function CollegePortal() {
   const navigate = useNavigate();
@@ -46,14 +65,16 @@ export default function CollegePortal() {
       timestamp: new Date()
     }
   ]);
-
+  const [timetable, setTimetable] = useState<TimetableItem[]>([]);
+  const [circulars, setCirculars] = useState<Circular[]>([]);
+  const [isBotLoading, setIsBotLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
-  
+
   const studentName = user?.name || `${user?.firstName} ${user?.lastName}`;
   const studentemail = user?.email || `${user?.email}`;
   const studentInfo = {
@@ -62,48 +83,69 @@ export default function CollegePortal() {
     id: 'SNU2024001',
     program: 'B.Tech Computer Science',
     semester: 'Semester 6'
-  };
+  }; 
 
-  const timetable = [
-    { day: 'Monday', time: '9:00 AM - 10:30 AM', subject: 'Machine Learning', room: 'LH-301', faculty: 'Dr. Sharma' },
-    { day: 'Monday', time: '11:00 AM - 12:30 PM', subject: 'Database Systems', room: 'LH-205', faculty: 'Prof. Gupta' },
-    { day: 'Tuesday', time: '10:00 AM - 11:30 AM', subject: 'Web Development', room: 'Lab-102', faculty: 'Dr. Singh' },
-    { day: 'Tuesday', time: '2:00 PM - 3:30 PM', subject: 'Computer Networks', room: 'LH-401', faculty: 'Prof. Verma' },
-    { day: 'Wednesday', time: '9:00 AM - 10:30 AM', subject: 'Software Engineering', room: 'LH-203', faculty: 'Dr. Patel' },
-    { day: 'Thursday', time: '11:00 AM - 12:30 PM', subject: 'ML Lab', room: 'Lab-201', faculty: 'Dr. Sharma' },
-    { day: 'Friday', time: '9:00 AM - 10:30 AM', subject: 'Seminar', room: 'LH-101', faculty: 'Multiple' }
-  ];
+    // 3. Fetch data from the backend when the component mounts
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const timetableRes = await timetableAPI.get();
+        if (timetableRes.data.success) {
+          setTimetable(timetableRes.data.data);
+        }
 
-  const circulars = [
-    {
-      id: 1,
-      title: 'Mid-Semester Examination Schedule',
-      date: '2025-10-01',
-      category: 'Academic',
-      content: 'Mid-semester examinations will be conducted from October 15-20, 2025. Please check your examination schedule on the portal.'
-    },
-    {
-      id: 2,
-      title: 'Fee Payment Deadline Extended',
-      date: '2025-09-28',
-      category: 'Finance',
-      content: 'The last date for semester fee payment has been extended to October 15, 2025.'
-    },
-    {
-      id: 3,
-      title: 'Cultural Fest Registration Open',
-      date: '2025-09-25',
-      category: 'Events',
-      content: 'Register for the annual cultural fest "Transcendence 2025". Last date: October 5, 2025.'
-    },
-    {
-      id: 4,
-      title: 'Library Hours Extended',
-      date: '2025-09-20',
-      category: 'Facility',
-      content: 'Library will remain open till 11:00 PM during examination period.'
-    }
-  ];
+        const circularsRes = await circularsAPI.get();
+        if (circularsRes.data.success) {
+          setCirculars(circularsRes.data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch portal data:", error);
+      }
+    };
+
+    fetchData();
+  }, []); // The empty array [] ensures this runs only once
+
+  // const timetable = [
+  //   { day: 'Monday', time: '9:00 AM - 10:30 AM', subject: 'Machine Learning', room: 'LH-301', faculty: 'Dr. Sharma' },
+  //   { day: 'Monday', time: '11:00 AM - 12:30 PM', subject: 'Database Systems', room: 'LH-205', faculty: 'Prof. Gupta' },
+  //   { day: 'Tuesday', time: '10:00 AM - 11:30 AM', subject: 'Web Development', room: 'Lab-102', faculty: 'Dr. Singh' },
+  //   { day: 'Tuesday', time: '2:00 PM - 3:30 PM', subject: 'Computer Networks', room: 'LH-401', faculty: 'Prof. Verma' },
+  //   { day: 'Wednesday', time: '9:00 AM - 10:30 AM', subject: 'Software Engineering', room: 'LH-203', faculty: 'Dr. Patel' },
+  //   { day: 'Thursday', time: '11:00 AM - 12:30 PM', subject: 'ML Lab', room: 'Lab-201', faculty: 'Dr. Sharma' },
+  //   { day: 'Friday', time: '9:00 AM - 10:30 AM', subject: 'Seminar', room: 'LH-101', faculty: 'Multiple' }
+  // ];
+
+  // const circulars = [
+  //   {
+  //     id: 1,
+  //     title: 'Mid-Semester Examination Schedule',
+  //     date: '2025-10-01',
+  //     category: 'Academic',
+  //     content: 'Mid-semester examinations will be conducted from October 15-20, 2025. Please check your examination schedule on the portal.'
+  //   },
+  //   {
+  //     id: 2,
+  //     title: 'Fee Payment Deadline Extended',
+  //     date: '2025-09-28',
+  //     category: 'Finance',
+  //     content: 'The last date for semester fee payment has been extended to October 15, 2025.'
+  //   },
+  //   {
+  //     id: 3,
+  //     title: 'Cultural Fest Registration Open',
+  //     date: '2025-09-25',
+  //     category: 'Events',
+  //     content: 'Register for the annual cultural fest "Transcendence 2025". Last date: October 5, 2025.'
+  //   },
+  //   {
+  //     id: 4,
+  //     title: 'Library Hours Extended',
+  //     date: '2025-09-20',
+  //     category: 'Facility',
+  //     content: 'Library will remain open till 11:00 PM during examination period.'
+  //   }
+  // ];
 
   const emergencyContacts = [
     { name: 'Campus Security', phone: '+91-120-266-7000', available: '24/7' },
@@ -182,8 +224,8 @@ export default function CollegePortal() {
     navigate('/login');
   };
 
-  const handleSendMessage = () => {
-    if (!chatMessage.trim()) return;
+  const handleSendMessage = async () => {
+    if (!chatMessage.trim() || isBotLoading) return;
 
     const userMessage = {
       type: 'user',
@@ -191,45 +233,60 @@ export default function CollegePortal() {
       timestamp: new Date()
     };
 
-    setChatMessages([...chatMessages, userMessage]);
+    setChatMessages(prev => [...prev, userMessage]);
     setChatMessage('');
+    setIsBotLoading(true);
 
-    // Simulate bot response
-    setTimeout(() => {
+    try {
+      // Make the actual API call to your backend
+      const response = await chatAPI.sendMessage(userMessage.message);
+
       const botResponse = {
         type: 'bot',
-        message: getBotResponse(chatMessage),
+        message: response.data.response,
         timestamp: new Date()
       };
       setChatMessages(prev => [...prev, botResponse]);
-    }, 1000);
-  };
 
-  const getBotResponse = (query: string) => {
-    const lowerQuery = query.toLowerCase();
-
-    if (lowerQuery.includes('fee') || lowerQuery.includes('payment')) {
-      return 'The last date for semester fee payment is October 15, 2025. You can pay online through the portal or visit the Accounts Office (Mon-Fri, 9:30 AM - 4:30 PM).';
-    } else if (lowerQuery.includes('exam') || lowerQuery.includes('examination')) {
-      return 'Mid-semester examinations will be conducted from October 15-20, 2025. Please check your examination schedule on the academic portal.';
-    } else if (lowerQuery.includes('library')) {
-      return 'The library is open Monday to Sunday from 8:00 AM to 11:00 PM. During examination period, extended hours till 11:00 PM are available.';
-    } else if (lowerQuery.includes('timetable') || lowerQuery.includes('schedule')) {
-      return 'You can view your complete timetable in the Timetable section of the portal. Your next class is Machine Learning on Monday at 9:00 AM in LH-301.';
-    } else if (lowerQuery.includes('contact') || lowerQuery.includes('help')) {
-      return 'For immediate assistance, you can contact Student Helpdesk at +91-120-266-7200 (9 AM - 6 PM) or check the Info section for more emergency contacts.';
-    } else if (lowerQuery.includes('event') || lowerQuery.includes('fest') || lowerQuery.includes('tech fest') || lowerQuery.includes('hackathon') || lowerQuery.includes('cultural')) {
-      return 'Upcoming events include Tech Fest 2025 on October 12th, Cultural Night "Transcendence" on October 18th, Career Fair on October 25th, and more! Check the Events tab for full details and registration.';
-    } else if (lowerQuery.includes('tech fest') || lowerQuery.includes('when is the fest')) {
-      return 'Tech Fest 2025 is scheduled for October 12th, 2025 from 9:00 AM to 6:00 PM at the Main Auditorium. Registration deadline is October 5th, 2025.';
-    } else if (lowerQuery.includes('transcendence') || lowerQuery.includes('cultural night')) {
-      return 'Cultural Night "Transcendence" will be held on October 18th, 2025 from 6:00 PM to 11:00 PM at the Open Air Theatre. Registration required by October 10th.';
-    } else if (lowerQuery.includes('career fair') || lowerQuery.includes('placement')) {
-      return 'Career Fair 2025 is on October 25th, 2025 from 10:00 AM to 4:00 PM at the Convention Center. No registration required - just walk in!';
-    } else {
-      return 'I can help you with information about fees, examinations, library timings, timetables, events, and campus contacts. What would you like to know more about?';
+    } catch (error) {
+      console.error("Failed to get AI response:", error);
+      const errorMessage = {
+        type: 'bot',
+        message: 'Sorry, I am having trouble connecting. Please try again later.',
+        timestamp: new Date()
+      };
+      setChatMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsBotLoading(false);
     }
   };
+
+
+  // const getBotResponse = (query: string) => {
+  //   const lowerQuery = query.toLowerCase();
+
+  //   if (lowerQuery.includes('fee') || lowerQuery.includes('payment')) {
+  //     return 'The last date for semester fee payment is October 15, 2025. You can pay online through the portal or visit the Accounts Office (Mon-Fri, 9:30 AM - 4:30 PM).';
+  //   } else if (lowerQuery.includes('exam') || lowerQuery.includes('examination')) {
+  //     return 'Mid-semester examinations will be conducted from October 15-20, 2025. Please check your examination schedule on the academic portal.';
+  //   } else if (lowerQuery.includes('library')) {
+  //     return 'The library is open Monday to Sunday from 8:00 AM to 11:00 PM. During examination period, extended hours till 11:00 PM are available.';
+  //   } else if (lowerQuery.includes('timetable') || lowerQuery.includes('schedule')) {
+  //     return 'You can view your complete timetable in the Timetable section of the portal. Your next class is Machine Learning on Monday at 9:00 AM in LH-301.';
+  //   } else if (lowerQuery.includes('contact') || lowerQuery.includes('help')) {
+  //     return 'For immediate assistance, you can contact Student Helpdesk at +91-120-266-7200 (9 AM - 6 PM) or check the Info section for more emergency contacts.';
+  //   } else if (lowerQuery.includes('event') || lowerQuery.includes('fest') || lowerQuery.includes('tech fest') || lowerQuery.includes('hackathon') || lowerQuery.includes('cultural')) {
+  //     return 'Upcoming events include Tech Fest 2025 on October 12th, Cultural Night "Transcendence" on October 18th, Career Fair on October 25th, and more! Check the Events tab for full details and registration.';
+  //   } else if (lowerQuery.includes('tech fest') || lowerQuery.includes('when is the fest')) {
+  //     return 'Tech Fest 2025 is scheduled for October 12th, 2025 from 9:00 AM to 6:00 PM at the Main Auditorium. Registration deadline is October 5th, 2025.';
+  //   } else if (lowerQuery.includes('transcendence') || lowerQuery.includes('cultural night')) {
+  //     return 'Cultural Night "Transcendence" will be held on October 18th, 2025 from 6:00 PM to 11:00 PM at the Open Air Theatre. Registration required by October 10th.';
+  //   } else if (lowerQuery.includes('career fair') || lowerQuery.includes('placement')) {
+  //     return 'Career Fair 2025 is on October 25th, 2025 from 10:00 AM to 4:00 PM at the Convention Center. No registration required - just walk in!';
+  //   } else {
+  //     return 'I can help you with information about fees, examinations, library timings, timetables, events, and campus contacts. What would you like to know more about?';
+  //   }
+  // };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0a0118]">
@@ -382,8 +439,8 @@ export default function CollegePortal() {
                   Weekly Schedule
                 </h3>
                 <div className="space-y-4">
-                  {timetable.map((item, index) => (
-                    <Card key={index} className="p-4 bg-gradient-to-br from-purple-900/20 to-purple-950/20 border-primary/30 hover:border-primary/50 transition-all">
+                  {timetable.map((item) => (
+                    <Card key={item._id} className="p-4 bg-gradient-to-br from-purple-900/20 to-purple-950/20 border-primary/30 hover:border-primary/50 transition-all">
                       <div className="flex flex-col md:flex-row md:items-center gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
@@ -523,7 +580,7 @@ export default function CollegePortal() {
                 </h3>
                 <div className="space-y-4">
                   {circulars.map((circular) => (
-                    <Card key={circular.id} className="p-5 bg-gradient-to-br from-purple-900/20 to-purple-950/20 border-primary/30 hover:border-primary/50 transition-all">
+                    <Card key={circular._id} className="p-5 bg-gradient-to-br from-purple-900/20 to-purple-950/20 border-primary/30 hover:border-primary/50 transition-all">
                       <div className="flex items-start justify-between mb-3">
                         <Badge
                           variant="outline"
@@ -633,10 +690,10 @@ export default function CollegePortal() {
       {isChatOpen && (
         <div
           className={`fixed ${isChatFullscreen
-              ? 'inset-0 w-full h-full'
-              : isChatMinimized
-                ? 'bottom-6 right-6 w-80'
-                : 'bottom-6 right-6 w-96 h-[600px]'
+            ? 'inset-0 w-full h-full'
+            : isChatMinimized
+              ? 'bottom-6 right-6 w-80'
+              : 'bottom-6 right-6 w-96 h-[600px]'
             } bg-black/95 border border-primary/30 ${isChatFullscreen ? 'rounded-none' : 'rounded-xl'} shadow-[0_0_40px_rgba(139,92,246,0.4)] backdrop-blur-md z-50 flex flex-col transition-all overflow-hidden`}
         >
           {/* Chat Header */}
@@ -722,8 +779,8 @@ export default function CollegePortal() {
                     <div key={index} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div
                         className={`${isChatFullscreen ? 'max-w-[60%]' : 'max-w-[80%]'} rounded-lg px-4 py-3 ${msg.type === 'user'
-                            ? 'bg-gradient-to-br from-purple-600 to-violet-600 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]'
-                            : 'bg-gradient-to-br from-purple-900/40 to-purple-950/40 border border-primary/30 text-purple-100'
+                          ? 'bg-gradient-to-br from-purple-600 to-violet-600 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                          : 'bg-gradient-to-br from-purple-900/40 to-purple-950/40 border border-primary/30 text-purple-100'
                           }`}
                       >
                         <p className={`${isChatFullscreen ? 'text-base' : 'text-sm'} leading-relaxed`}>{msg.message}</p>
@@ -742,6 +799,14 @@ export default function CollegePortal() {
                     </div>
                   )}
 
+                  {isBotLoading && (
+                    <div className="flex justify-start">
+                      <div className="rounded-lg px-4 py-3 bg-gradient-to-br from-purple-900/40 to-purple-950/40 border border-primary/30 text-purple-100">
+                        <p className="text-sm leading-relaxed"><i>Typing...</i></p>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Scroll anchor */}
                   <div ref={messagesEndRef} />
                 </div>
@@ -756,11 +821,13 @@ export default function CollegePortal() {
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     placeholder={`Ask Selene anything... (${selectedLanguage})`}
                     className={`flex-1 bg-purple-950/30 border-primary/30 focus:border-primary/50 text-white placeholder:text-purple-400 ${isChatFullscreen ? 'text-base py-3' : ''}`}
+                    disabled={isBotLoading}
                   />
                   <Button
                     onClick={handleSendMessage}
                     size={isChatFullscreen ? "default" : "icon"}
                     className="bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 shadow-[0_0_15px_rgba(139,92,246,0.4)]"
+                    disabled={isBotLoading}
                   >
                     <Send className="w-4 h-4" />
                     {isChatFullscreen && <span className="ml-2">Send</span>}

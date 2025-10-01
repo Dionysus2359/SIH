@@ -74,37 +74,29 @@ const registerUser = async (req, res, next) => {
 // Login user
 const loginUser = async (req, res, next) => {
     try {
-        // Validate input using Joi schema
         const validation = validateRequest(userLoginSchema, req.body);
         if (!validation.isValid) {
             return res.status(400).json({
                 success: false,
                 message: validation.error,
-                data: {}
             });
         }
 
         const { email, password } = validation.value;
+        const user = await User.findOne({ email });
 
-        // Find user by email
-        let user = null;
-        if (email) {
-            user = await User.findOne({ email });
-        }
         if (!user) {
             return res.status(401).json({
                 success: false,
                 message: "Invalid email or password",
-                data: {}
             });
         }
 
-        // Verify password using passport-local-mongoose authenticate method
         const authenticateResult = await new Promise((resolve, reject) => {
-            user.authenticate(password, (err, user, error) => {
+            user.authenticate(password, (err, authenticatedUser, error) => {
                 if (err) reject(err);
                 else if (error) resolve({ user: null, error });
-                else resolve({ user, error: null });
+                else resolve({ user: authenticatedUser, error: null });
             });
         });
 
@@ -112,45 +104,34 @@ const loginUser = async (req, res, next) => {
             return res.status(401).json({
                 success: false,
                 message: "Invalid email or password",
-                data: {}
             });
         }
 
-        // Create session
-        req.session.userId = user._id;
-        // req.session.userUsername = user.username;
-        req.session.username = user.email;
-        req.session.role = user.role; // Store role in session
-
-        // Save session explicitly to ensure it's persisted
-        req.session.save((err) => {
+        // --- THIS IS THE FIX ---
+        // Replace the manual req.session logic with Passport's req.login()
+        req.login(authenticateResult.user, (err) => {
             if (err) {
-                console.error('Session save error:', err);
-                return res.status(500).json({
-                    success: false,
-                    message: "Error saving session",
-                    data: {}
-                });
+                return next(err);
             }
 
-            console.log('Session created successfully for user:', user.email);
+            console.log('Session created successfully via Passport for user:', authenticateResult.user.email);
 
-            // Return user data (excluding sensitive information)
             const userData = {
-                id: user._id,
-                name: user.firstName + ' ' + user.lastName,
-                // username: user.username,
-                email: user.email,
-                role: user.role,
-                createdAt: user.createdAt
+                id: authenticateResult.user._id,
+                name: `${authenticateResult.user.firstName} ${authenticateResult.user.lastName}`,
+                firstName: authenticateResult.user.firstName,
+                lastName: authenticateResult.user.lastName,
+                email: authenticateResult.user.email,
+                role: authenticateResult.user.role,
             };
 
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 message: "Login successful",
                 data: userData
             });
         });
+        // --- END OF FIX ---
 
     } catch (error) {
         console.error('Login error:', error);
