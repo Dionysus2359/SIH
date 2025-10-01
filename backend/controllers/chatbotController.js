@@ -18,15 +18,18 @@ const generateResponse = async (req, res) => {
     let userTimetable = [];
     let recentCirculars = [];
 
-    // req.user is available because Passport.js runs before your routes
     if (req.isAuthenticated()) {
       userTimetable = await Timetable.find({ userId: req.user._id }).lean();
       recentCirculars = await Circular.find().sort({ date: -1 }).limit(5).lean();
     }
     
+    // --- THIS IS THE UPDATED PROMPT ---
     const enhancedPrompt = `
-    You are a helpful campus assistant named Selene. Answer the user's question based ONLY on the context provided below.
-    If the information is not in the context, say that you don't have that information. Do not make up answers.
+    You are a helpful and friendly campus assistant named Selene.
+
+    1.  Your primary goal is to answer questions using the "CONTEXT" provided below. Use it for specific questions about the user's timetable or university circulars.
+    2.  If the question is general (e.g., asking for a study plan, advice, creative ideas, or general knowledge), you should act as a helpful personal assistant and use your own intelligence to answer.
+    3.  Do not make up university-specific information (like class details or circulars) if it is not in the context. If you can't find the specific university information, say so politely.
 
     ---
     CONTEXT:
@@ -51,8 +54,7 @@ const generateResponse = async (req, res) => {
     const response = await result.response;
     const text = response.text();
     
-    // Log the interaction to the database
-    if (req.isAuthenticated()) { // Only log if a user is logged in
+    if (req.isAuthenticated()) {
         const newLog = new ChatLog({ query: prompt, response: text, userId: req.user._id });
         await newLog.save();
     }
